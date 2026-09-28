@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gradient Descent Visualizer - Both Sides</title>
+<style>
+body{font-family:Arial;padding:20px}
+canvas{border:1px solid #aaa;max-width:100%}
+button,input{padding:8px;margin:5px}
+</style>
+</head>
+<body>
+
+<h2>Gradient Descent Visualizer (Left & Right Start)</h2>
+
+<canvas id="c" width="700" height="400"></canvas>
+<br>
+
+<button onclick="startLeft()">⬅ Start Left Side</button>
+<button onclick="startRight()">Start Right Side ➡</button>
+<button onclick="step()">▶ Gradient Step</button>
+<button onclick="reset()">↺ Reset</button>
+
+<br>
+Learning Rate:
+<input id="lr" type="range" min="0.01" max="0.5" step="0.01" value="0.1">
+
+<p id="info"></p>
+
+<script>
+const canvas=document.getElementById("c");
+const ctx=canvas.getContext("2d");
+
+let x=-4;
+let alpha=0.1;
+
+function f(x){return x*x;}
+function derivative(x){return 2*x;}
+
+function draw(){
+
+ctx.clearRect(0,0,700,400);
+
+// curve
+ctx.beginPath();
+ctx.strokeStyle="black";
+
+for(let i=0;i<700;i++){
+ let xv=(i-350)/40;
+ let y=300-f(xv)*8;
+ if(i===0) ctx.moveTo(i,y);
+ else ctx.lineTo(i,y);
+}
+ctx.stroke();
+
+
+// point
+let px=350+x*40;
+let py=300-f(x)*8;
+
+ctx.fillStyle="red";
+ctx.beginPath();
+ctx.arc(px,py,9,0,Math.PI*2);
+ctx.fill();
+
+
+// tangent
+let g=derivative(x);
+
+ctx.beginPath();
+ctx.strokeStyle="blue";
+
+let x1=x-1;
+let x2=x+1;
+
+ctx.moveTo(
+350+x1*40,
+300-(f(x)+g*(x1-x))*8
+);
+
+ctx.lineTo(
+350+x2*40,
+300-(f(x)+g*(x2-x))*8
+);
+
+ctx.stroke();
+
+
+let direction=g>0?"⬅ LEFT (downhill)":"➡ RIGHT (downhill)";
+
+document.getElementById("info").innerHTML=
+`
+Current x = ${x.toFixed(2)} <br>
+Loss = ${f(x).toFixed(2)} <br>
+Derivative = ${g.toFixed(2)}
+${g>0?" (+ Positive)":" (- Negative)"} <br>
+Direction: ${direction}<br>
+Update:
+x_new = x - α × derivative <br>
+Next x = ${(x-document.getElementById("lr").value*g).toFixed(2)}
+`;
+}
+
+
+function step(){
+alpha=document.getElementById("lr").value;
+x=x-alpha*derivative(x);
+draw();
+}
+
+function startLeft(){
+x=-4;
+draw();
+}
+
+function startRight(){
+x=4;
+draw();
+}
+
+function reset(){
+x=-4;
+draw();
+}
+
+draw();
+
+</script>
+
+</body>
+</html>
